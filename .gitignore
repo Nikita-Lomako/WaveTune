@@ -1,0 +1,36 @@
+# VS Code
+.vscode/
+*.code-workspace
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Логи и временные файлы
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+
+# Если в будущем появятся npm-пакеты (хотя по ТЗ их нет)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Сборки (если появятся)
+dist/
+build/
+*.min.js
+*.min.css
+
+# Файлы с чувствительными данными (например, .env)
+.env
+.env.local
