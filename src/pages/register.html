@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WaveTune — Регистрация</title>
+  <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+  <main class="auth-panel">
+    <h1 class="auth-panel__title">Создать аккаунт</h1>
+    <p>Присоединяйтесь к WaveTune и сохраняйте любимые треки.</p>
+    <form id="registerForm">
+      <input type="text" name="name" placeholder="Имя" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="password" name="password" placeholder="Пароль" required>
+      <button class="button-primary" type="submit">Зарегистрироваться</button>
+    </form>
+    <p>Уже есть аккаунт? <a href="login.html">Войти</a></p>
+  </main>
+  <script type="module">
+    import Auth from '../scripts/modules/Auth.js';
+    const auth = new Auth();
+    document.getElementById('registerForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      auth.login({ id: crypto.randomUUID(), name: event.target.name.value, email: event.target.email.value });
+      window.location.href = '/index.html';
+    });
+  </script>
+</body>
+</html>
