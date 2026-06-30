@@ -12,7 +12,6 @@ export default function renderSidebar() {
     <section class="sidebar__section" aria-label="Плейлисты">
       <div class="sidebar__section-header">
         <h2>Плейлисты</h2>
-        <span class="badge">cyber</span>
       </div>
       <ul class="sidebar__playlist-list">
         <li><button class="sidebar__playlist-item" type="button"><span><i class="fa-solid fa-play"></i> Для пробежки</span></button></li>

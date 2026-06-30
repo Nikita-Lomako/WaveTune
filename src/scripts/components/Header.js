@@ -3,7 +3,7 @@ export default function renderHeader() {
   if (!header) return;
   header.innerHTML = `
     <div class="topbar__brand">
-      <button class="burger" data-queue-toggle aria-label="Открыть очередь"><i class="fa-solid fa-bars-staggered"></i></button>
+      <button class="burger" data-queue-toggle aria-label="Открыть очередь"><i class="fa-solid fa-bars"></i></button>
       <div>
         <p class="eyebrow">cyber audio</p>
         <h1>WaveTune</h1>
