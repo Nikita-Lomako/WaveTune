@@ -16,6 +16,11 @@ export default class Player {
     }
     if (!this.audio) return;
 
+    this.volumeControl = document.querySelector('[data-volume]');
+    if (this.volumeControl) {
+      this.volumeControl.value = String(this.audio.volume || 0.8);
+    }
+
     this.audio.addEventListener('timeupdate', () => this.updateProgress());
     this.audio.addEventListener('ended', () => this.next());
     document.querySelector('[data-play-toggle]')?.addEventListener('click', () => this.toggle());
@@ -23,12 +28,52 @@ export default class Player {
     document.querySelector('[data-prev]')?.addEventListener('click', () => this.previous());
     document.querySelector('[data-progress]')?.addEventListener('click', (event) => this.seek(event));
     document.querySelector('[data-volume]')?.addEventListener('input', (event) => this.setVolume(event.target.value));
+
+    document.addEventListener('keydown', (event) => {
+      const target = event.target;
+      if (target instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+      if (target?.isContentEditable) return;
+
+      switch (event.key) {
+        case ' ': 
+        case 'Spacebar':
+          event.preventDefault();
+          this.toggle();
+          break;
+        case 'ArrowRight':
+          event.preventDefault();
+          this.next();
+          break;
+        case 'ArrowLeft':
+          event.preventDefault();
+          this.previous();
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          this.setVolume(Math.min(1, this.audio.volume + 0.1));
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          this.setVolume(Math.max(0, this.audio.volume - 0.1));
+          break;
+      }
+    });
   }
 
   async loadSong(songId) {
     const song = getSongById(songId);
     if (!song) return;
     this.currentSongId = song.id;
+    this.currentIndex = this.playlist.findIndex(item => item.id === song.id);
+    if (this.currentIndex < 0) {
+      if (this.playlist.length) {
+        this.playlist.unshift(song);
+        this.currentIndex = 0;
+      } else {
+        this.currentIndex = 0;
+        this.playlist = [song];
+      }
+    }
     this.audio.src = song.audio;
     this.audio.load();
     this.renderSong(song);
@@ -38,6 +83,27 @@ export default class Player {
       this.renderPlaybackState();
     });
     this.isPlaying = true;
+    this.renderPlaybackState();
+  }
+
+  setQueue(items) {
+    this.playlist = [...items];
+    this.currentIndex = this.playlist.findIndex(song => song.id === this.currentSongId);
+    if (this.currentIndex < 0) {
+      this.currentIndex = this.playlist.length ? 0 : -1;
+      if (this.currentIndex >= 0) {
+        this.currentSongId = this.playlist[0].id;
+      }
+    }
+  }
+
+  clear() {
+    this.playlist = [];
+    this.currentIndex = -1;
+    this.audio.pause();
+    this.audio.src = '';
+    this.isPlaying = false;
+    this.updateProgress();
     this.renderPlaybackState();
   }
 
@@ -62,16 +128,19 @@ export default class Player {
   }
 
   next() {
+    if (!this.playlist.length) return;
     this.currentIndex = (this.currentIndex + 1) % this.playlist.length;
     this.loadSong(this.playlist[this.currentIndex].id);
   }
 
   previous() {
+    if (!this.playlist.length) return;
     this.currentIndex = (this.currentIndex - 1 + this.playlist.length) % this.playlist.length;
     this.loadSong(this.playlist[this.currentIndex].id);
   }
 
   seek(event) {
+    if (!this.audio.duration || Number.isNaN(this.audio.duration) || !Number.isFinite(this.audio.duration)) return;
     const progressTrack = event.currentTarget;
     const rect = progressTrack.getBoundingClientRect();
     const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
@@ -81,6 +150,7 @@ export default class Player {
 
   setVolume(value) {
     this.audio.volume = Number(value);
+    if (this.volumeControl) this.volumeControl.value = String(this.audio.volume);
   }
 
   updateProgress() {

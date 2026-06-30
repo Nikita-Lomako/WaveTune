@@ -13,10 +13,59 @@ const auth = new Auth();
 const favorites = new Favorites();
 const theme = new Theme();
 const player = new Player();
-const playlistPanel = new PlaylistPanel();
+const playlistPanel = new PlaylistPanel({
+  onSelect: loadQueueSong,
+  onRemove: removeFromQueue,
+  onReorder: handleQueueReorder,
+  onAutoPlay: (id) => player.loadSong(id)
+});
 
 let currentVisibleSongs = [...songs];
-let favoritesOnly = false;
+let queue = [];
+
+// Функция обновления очереди
+function updateQueue(items, forceTop = false) {
+  queue = [...items];
+  playlistPanel.setQueue(queue);    // теперь setQueue только рендерит
+  player.setQueue(queue);
+
+  const queueHint = document.getElementById('queueHint');
+  if (queueHint) {
+    queueHint.textContent = queue.length ? `Всего треков: ${queue.length}` : 'Очередь пуста';
+  }
+
+  if (!queue.length) {
+    player.clear();
+    return;
+  }
+
+  const currentInQueue = queue.some(item => item.id === player.currentSongId);
+  if (forceTop || !currentInQueue) {
+    player.loadSong(queue[0].id);
+  }
+}
+
+function addToQueue(songId) {
+  const song = getSongById(songId);
+  if (!song) return;
+  if (queue.some(item => item.id === song.id)) return;
+  // Добавляем в начало очереди и сразу загружаем
+  updateQueue([song, ...queue], true);
+}
+
+function removeFromQueue(songId) {
+  updateQueue(queue.filter(song => song.id !== songId));
+}
+
+function loadQueueSong(songId) {
+  const song = queue.find(item => item.id === Number(songId));
+  if (!song) return;
+  player.loadSong(song.id);
+}
+
+function handleQueueReorder(newQueue) {
+  updateQueue(newQueue, true);
+}
 
 function renderRecommendations(items = songs) {
   const container = document.getElementById('recommendationsGrid');
@@ -49,44 +98,9 @@ function renderRecommendations(items = songs) {
     `;
     article.addEventListener('click', (event) => {
       if (event.target.closest('[data-fav-toggle]')) return;
-      player.loadSong(song.id);
-      renderPlaylist(getFilteredSongs());
-      playlistPanel.setQueue(getFilteredSongs());
+      addToQueue(song.id);
     });
     container.appendChild(article);
-  });
-}
-
-function getFilteredSongs() {
-  if (!favoritesOnly) return [...currentVisibleSongs];
-  return currentVisibleSongs.filter(song => favorites.isFavorite(song.id));
-}
-
-function renderPlaylist(items = getFilteredSongs()) {
-  const body = document.querySelector('[data-playlist-body]');
-  if (!body) return;
-  const visibleItems = items.length ? items : getFilteredSongs();
-  body.innerHTML = '';
-  if (!visibleItems.length) {
-    body.innerHTML = '<tr><td colspan="4" class="empty-state">Нет треков для отображения</td></tr>';
-    return;
-  }
-  visibleItems.forEach(song => {
-    const row = document.createElement('tr');
-    row.dataset.songId = song.id;
-    row.className = `playlist-row ${player.currentSongId === song.id ? 'is-active' : ''}`;
-    row.innerHTML = `
-      <td>${song.title}</td>
-      <td>${song.artist}</td>
-      <td>${formatTime(song.duration)}</td>
-      <td><button class="icon-button table-action ${favorites.isFavorite(song.id) ? 'is-favorite' : ''}" data-fav-toggle="${song.id}" aria-label="Лайк"><i class="fa-${favorites.isFavorite(song.id) ? 'solid' : 'regular'} fa-heart"></i></button></td>
-    `;
-    row.addEventListener('click', (event) => {
-      if (event.target.closest('[data-fav-toggle]')) return;
-      player.loadSong(song.id);
-      renderPlaylist(getFilteredSongs());
-    });
-    body.appendChild(row);
   });
 }
 
@@ -130,8 +144,7 @@ function handleFavoritesClick(event) {
   event.stopPropagation();
   const songId = Number(button.dataset.favToggle);
   favorites.toggle(songId);
-  renderRecommendations(getFilteredSongs());
-  renderPlaylist(getFilteredSongs());
+  renderRecommendations(currentVisibleSongs);
 }
 
 function handlePlaylistsLink() {
@@ -151,22 +164,13 @@ function init() {
   theme.init();
   renderAuthArea();
   renderRecommendations(songs);
-  renderPlaylist(songs);
-  playlistPanel.setQueue(songs);
-  player.loadSong(player.currentSongId);
+  updateQueue([]);
 
   document.addEventListener('click', handleFavoritesClick);
   document.querySelector('[data-playlists-link]')?.addEventListener('click', handlePlaylistsLink);
-  document.getElementById('favoritesToggle')?.addEventListener('click', () => {
-    favoritesOnly = !favoritesOnly;
-    document.getElementById('favoritesToggle').textContent = favoritesOnly ? 'Показать все' : 'Показать избранные';
-    document.getElementById('playlistModeLabel').textContent = favoritesOnly ? 'Сейчас: Избранные' : 'Сейчас: Все треки';
-    renderPlaylist(getFilteredSongs());
-  });
   new Search((filtered) => {
     currentVisibleSongs = filtered;
     renderRecommendations(filtered);
-    renderPlaylist(getFilteredSongs());
   });
 }
 

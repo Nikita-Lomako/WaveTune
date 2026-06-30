@@ -18,49 +18,27 @@
           <section class="panel-card" aria-labelledby="recommendations-title">
             <div class="section-head">
               <h2 id="recommendations-title">Рекомендации</h2>
-              <span class="badge">cyber mix</span>
+              <span class="badge">Tracks</span>
             </div>
             <div class="recommendations-grid" id="recommendationsGrid"></div>
           </section>
 
-          <section class="panel-card" aria-labelledby="playlist-title">
-            <div class="section-head">
-              <div>
-                <h2 id="playlist-title">Мои плейлисты</h2>
-                <p class="badge" id="playlistModeLabel">Сейчас: Все треки</p>
-              </div>
-              <button class="button-secondary" type="button" id="favoritesToggle">Показать избранные</button>
-            </div>
-            <div class="table-wrap">
-              <table class="playlist-table">
-                <thead>
-                  <tr>
-                    <th>Название</th>
-                    <th>Исполнитель</th>
-                    <th>Длительность</th>
-                    <th>Любимое</th>
-                  </tr>
-                </thead>
-                <tbody data-playlist-body></tbody>
-              </table>
-            </div>
-          </section>
         </main>
       </div>
 
       <div class="queue-panel__backdrop" data-queue-backdrop></div>
-      <aside class="queue-panel" id="queuePanel" aria-label="Очередь воспроизведения">
+      <aside class="queue-panel is-open" id="queuePanel" aria-label="Мои плейлисты">
         <div class="queue-panel__header">
           <div>
-            <h3>Очередь</h3>
-            <p class="badge">drag & drop</p>
+            <h2 id="queue-title">Мои плейлисты</h2>
+            <p class="badge" id="queueHint">Очередь пуста</p>
           </div>
-          <button class="icon-button" type="button" data-queue-close aria-label="Свернуть очередь">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
         </div>
         <ul class="queue-list" id="queueList"></ul>
       </aside>
+      <button class="queue-panel__toggle" type="button" data-queue-toggle aria-label="Свернуть очередь">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
 
       <footer class="player-bar" data-player aria-label="Музыкальный плеер"></footer>
     </div>
