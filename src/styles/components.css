@@ -1,0 +1,36 @@
+.button-primary, .button-secondary, .ghost-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 10px 16px;
+  min-height: 44px;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  text-decoration: none;
+}
+.button-primary:hover, .button-secondary:hover, .ghost-button:hover, .icon-button:hover, .sidebar__link:hover { transform: translateY(-1px); }
+.button-primary {
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-2));
+  color: white;
+  box-shadow: 0 10px 24px rgba(0, 179, 254, 0.24);
+}
+.button-secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--border);
+}
+.ghost-button { background: transparent; border-color: var(--border); }
+
+.fav-toggle.is-favorite {
+  color: var(--color-accent);
+}
+
+.track-card__actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+
+.table-action { padding: 8px 10px; }
+
+.queue-panel__hint { padding: 16px; color: var(--color-text-muted); font-size: 0.95rem; }
+
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 999px; background: rgba(255,255,255,0.08); color: var(--color-text-muted); font-size: 0.8rem; }

@@ -1,11 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="ru">
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-   
-</body>
+    <title>WaveTune</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="./src/styles/main.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" data-sidebar aria-label="Боковое меню"></aside>
+
+      <div class="main-shell">
+        <header class="topbar" data-header></header>
+
+        <main class="content" id="mainContent">
+          <section class="panel-card" aria-labelledby="recommendations-title">
+            <div class="section-head">
+              <h2 id="recommendations-title">Рекомендации</h2>
+              <span class="badge">Tracks</span>
+            </div>
+            <div class="recommendations-grid" id="recommendationsGrid"></div>
+          </section>
+
+        </main>
+      </div>
+
+      <div class="queue-panel__backdrop" data-queue-backdrop></div>
+      <aside class="queue-panel is-open" id="queuePanel" aria-label="Мои плейлисты">
+        <div class="queue-panel__header">
+          <div>
+            <h2 id="queue-title">Мои плейлисты</h2>
+            <p class="badge" id="queueHint">Очередь пуста</p>
+          </div>
+        </div>
+        <ul class="queue-list" id="queueList"></ul>
+      </aside>
+      <button class="queue-panel__toggle" type="button" data-queue-toggle aria-label="Свернуть очередь">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+      <footer class="player-bar" data-player aria-label="Музыкальный плеер"></footer>
+    </div>
+
+    <script type="module" src="./src/scripts/main.js"></script>
+  </body>
 </html>

@@ -1,0 +1,13 @@
+html[data-theme="light"] .sidebar,
+html[data-theme="light"] .topbar,
+html[data-theme="light"] .player-bar,
+html[data-theme="light"] .queue-panel {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+html[data-theme="light"] .track-card,
+html[data-theme="light"] .panel-card,
+html[data-theme="light"] .auth-panel,
+html[data-theme="light"] .modal-card {
+  background: rgba(255,255,255,0.95);
+}
