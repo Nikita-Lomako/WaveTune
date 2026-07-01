@@ -7,7 +7,8 @@ export default class Player {
     this.playlist = [...songs];
     this.currentIndex = this.playlist.findIndex(song => song.id === this.currentSongId);
     if (this.currentIndex < 0) this.currentIndex = 0;
-    this.isPlaying = false;
+    this.isPlaying = localStorage.getItem('wave-is-playing') === '1';
+    this.currentTime = Number(localStorage.getItem('wave-current-time') || 0);
   }
 
   bindEvents() {
@@ -21,7 +22,16 @@ export default class Player {
       this.volumeControl.value = String(this.audio.volume || 0.8);
     }
 
-    this.audio.addEventListener('timeupdate', () => this.updateProgress());
+    this.audio.addEventListener('timeupdate', () => {
+      this.currentTime = this.audio.currentTime || 0;
+      this.persistQueue();
+      this.updateProgress();
+    });
+    this.audio.addEventListener('loadedmetadata', () => {
+      if (this.currentTime > 0) {
+        this.audio.currentTime = this.currentTime;
+      }
+    });
     this.audio.addEventListener('ended', () => this.next());
     document.querySelector('[data-play-toggle]')?.addEventListener('click', () => this.toggle());
     document.querySelector('[data-next]')?.addEventListener('click', () => this.next());
@@ -74,10 +84,13 @@ export default class Player {
         this.playlist = [song];
       }
     }
+    this.currentTime = Number(localStorage.getItem(`wave-track-time:${song.id}`) || 0);
     this.audio.src = song.audio;
     this.audio.load();
     this.renderSong(song);
     localStorage.setItem('wave-last-track', String(song.id));
+    this.audio.currentTime = this.currentTime;
+    this.persistQueue();
     await this.audio.play().catch(() => {
       this.isPlaying = false;
       this.renderPlaybackState();
@@ -95,6 +108,52 @@ export default class Player {
         this.currentSongId = this.playlist[0].id;
       }
     }
+    this.persistQueue();
+  }
+
+  persistQueue() {
+    const queueState = this.playlist.map(song => song.id);
+    const currentTime = this.audio?.currentTime || this.currentTime || 0;
+    localStorage.setItem('wave-queue', JSON.stringify(queueState));
+    localStorage.setItem('wave-current-song', String(this.currentSongId));
+    localStorage.setItem('wave-current-time', String(currentTime));
+    localStorage.setItem(`wave-track-time:${this.currentSongId}`, String(currentTime));
+    localStorage.setItem('wave-is-playing', this.isPlaying ? '1' : '0');
+  }
+
+  restoreQueue() {
+    const savedQueue = localStorage.getItem('wave-queue');
+    if (!savedQueue) return false;
+    try {
+      const parsed = JSON.parse(savedQueue);
+      const items = parsed.map(id => getSongById(id)).filter(Boolean);
+      if (items.length) {
+        this.playlist = items;
+        this.currentSongId = Number(localStorage.getItem('wave-current-song') || items[0].id);
+        this.currentIndex = this.playlist.findIndex(song => song.id === this.currentSongId);
+        if (this.currentIndex < 0) this.currentIndex = 0;
+        this.isPlaying = localStorage.getItem('wave-is-playing') === '1';
+        this.currentTime = Number(localStorage.getItem(`wave-track-time:${this.currentSongId}`) || localStorage.getItem('wave-current-time') || 0);
+        const song = getSongById(this.currentSongId);
+        if (song && this.audio) {
+          this.audio.src = song.audio;
+          this.audio.load();
+          this.audio.currentTime = this.currentTime;
+          this.renderSong(song);
+          this.renderPlaybackState();
+          if (this.isPlaying) {
+            this.audio.play().catch(() => {
+              this.isPlaying = false;
+              this.renderPlaybackState();
+            });
+          }
+        }
+        return true;
+      }
+    } catch (error) {
+      console.warn('Failed to restore queue', error);
+    }
+    return false;
   }
 
   clear() {
@@ -103,6 +162,7 @@ export default class Player {
     this.audio.pause();
     this.audio.src = '';
     this.isPlaying = false;
+    this.persistQueue();
     this.updateProgress();
     this.renderPlaybackState();
   }
@@ -110,9 +170,11 @@ export default class Player {
   play() {
     this.audio.play().then(() => {
       this.isPlaying = true;
+      this.persistQueue();
       this.renderPlaybackState();
     }).catch(() => {
       this.isPlaying = false;
+      this.persistQueue();
       this.renderPlaybackState();
     });
   }
@@ -120,6 +182,7 @@ export default class Player {
   pause() {
     this.audio.pause();
     this.isPlaying = false;
+    this.persistQueue();
     this.renderPlaybackState();
   }
 

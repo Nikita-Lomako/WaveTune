@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WaveTune — Настройки</title>
+  <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" data-sidebar aria-label="Боковое меню"></aside>
+    <div class="main-shell">
+      <header class="topbar" data-header></header>
+      <main class="content" id="mainContent">
+        <section class="panel-card settings-card">
+          <div class="section-head">
+            <div>
+              <h1>Настройки аккаунта</h1>
+              <p class="badge">Личный профиль</p>
+            </div>
+            <a class="button-secondary" href="/index.html">← На главную</a>
+          </div>
+          <form id="settingsForm" class="settings-form">
+            <label class="settings-field">
+              <span>Фото профиля</span>
+              <input type="url" name="avatar" placeholder="https://..." />
+            </label>
+            <label class="settings-field">
+              <span>Имя аккаунта</span>
+              <input type="text" name="name" placeholder="Ваше имя" required />
+            </label>
+            <button class="button-primary" type="submit">Сохранить</button>
+          </form>
+        </section>
+      </main>
+    </div>
+    <div class="queue-panel__backdrop" data-queue-backdrop></div>
+    <aside class="queue-panel is-open" id="queuePanel" aria-label="Мои плейлисты">
+      <div class="queue-panel__header">
+        <div>
+          <h2 id="queue-title">Мои плейлисты</h2>
+          <p class="badge" id="queueHint">Очередь пуста</p>
+        </div>
+      </div>
+      <ul class="queue-list" id="queueList"></ul>
+    </aside>
+    <button class="queue-panel__toggle" type="button" data-queue-toggle aria-label="Свернуть очередь">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+    <footer class="player-bar" data-player aria-label="Музыкальный плеер"></footer>
+  </div>
+  <script type="module" src="../scripts/main.js"></script>
+  <script type="module">
+    import Auth from '../scripts/modules/Auth.js';
+    const auth = new Auth();
+    if (!auth.isAuthenticated()) {
+      window.location.href = '/src/pages/login.html';
+    }
+
+    const form = document.getElementById('settingsForm');
+    const user = auth.user;
+    form.elements.name.value = user.name || '';
+    form.elements.avatar.value = user.avatar || '';
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const nextUser = { ...user, name: form.elements.name.value.trim() || user.name, avatar: form.elements.avatar.value.trim() };
+      auth.login(nextUser);
+      window.location.href = '/index.html';
+    });
+  </script>
+</body>
+</html>

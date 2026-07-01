@@ -1,6 +1,11 @@
 export default function renderPlayerBar() {
   const player = document.querySelector('[data-player]');
   if (!player) return;
+
+  if (player.querySelector('[data-play-toggle]')) {
+    return;
+  }
+
   player.innerHTML = `
     <div class="player-bar__left">
       <img data-player-cover src="https://picsum.photos/seed/1/300/300" alt="Обложка">

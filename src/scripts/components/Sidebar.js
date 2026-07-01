@@ -4,8 +4,8 @@ export default function renderSidebar() {
   sidebar.innerHTML = `
     <nav aria-label="Основная навигация">
       <ul class="sidebar__nav">
-        <li><button class="sidebar__link is-active" type="button"><span><i class="fa-solid fa-house"></i> Главная</span></button></li>
-        <li><button class="sidebar__link" type="button"><span><i class="fa-solid fa-compass"></i> Обзор</span></button></li>
+        <li><a class="sidebar__link is-active" href="/index.html"><span><i class="fa-solid fa-house"></i> Главная</span></a></li>
+        <li><a class="sidebar__link" href="/src/pages/explore.html"><span><i class="fa-solid fa-compass"></i> Обзор</span></a></li>
         <li><button class="sidebar__link" type="button" data-playlists-link><span><i class="fa-solid fa-list-ul"></i> Мои плейлисты</span></button></li>
       </ul>
     </nav>

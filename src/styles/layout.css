@@ -108,7 +108,7 @@ img { display: block; max-width: 100%; }
   right: 0;
   bottom: 0;
   width: 100%;
-  height: var(--player-height);
+  min-height: var(--player-height);
   padding: 12px 24px;
   display: flex;
   flex-direction: row;
@@ -118,7 +118,7 @@ img { display: block; max-width: 100%; }
   border-top: 1px solid var(--border);
   backdrop-filter: blur(24px);
   z-index: 20;
-  gap: 16px;
+  gap: 12px;
 }
 
 .player-bar__left {
@@ -159,10 +159,10 @@ img { display: block; max-width: 100%; }
 .player-bar__controls { display: flex; align-items: center; flex: 0 0 auto; gap: 8px; }
 .player-bar__controls button, .icon-button, .ghost-button { border: none; background: rgba(255,255,255,0.08); color: var(--color-text); padding: 9px 12px; border-radius: 999px; }
 .player-bar__controls button.is-active { background: var(--color-accent); color: white; }
-.player-bar__progress { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 400px; }
+.player-bar__progress { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 430px; min-width: 220px; }
 .progress-track { flex: 1; position: relative; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.16); overflow: hidden; }
 .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--color-accent), var(--color-accent-2)); border-radius: inherit; }
-.volume-row { display: flex; align-items: center; gap: 8px; }
+.volume-row { display: flex; align-items: center; gap: 6px; margin-left: 8px; }
 .volume-row input[type="range"] { accent-color: var(--color-accent); width: 90px; }
 
 .sidebar__nav, .sidebar__playlist-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
@@ -181,12 +181,12 @@ img { display: block; max-width: 100%; }
   background: rgba(6,7,13,0.96);
   border-left: 1px solid var(--border);
   box-shadow: -10px 0 30px rgba(0,0,0,0.25);
-  transition: transform 0.25s ease,  opacity 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease;
   z-index: 29;
   transform: translateX(0);
   display: flex;
   flex-direction: column;
-  padding-bottom: var(--player-height);
+  padding-bottom: calc(var(--player-height) + 16px);
 }
 .queue-panel.is-closed {
   transform: translateX(100%); /* скрыто за правым краем */
@@ -278,10 +278,33 @@ img { display: block; max-width: 100%; }
 .auth-panel input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--color-surface); color: var(--color-text); }
 .auth-panel a { color: var(--color-accent-2); }
 
+.settings-page, .explore-page { min-height: calc(100vh - 120px); padding: 24px 16px 120px; }
+.settings-card, .explore-hero { padding: 24px; display: grid; gap: 20px; }
+.settings-form { display: grid; gap: 14px; max-width: 520px; }
+.settings-field { display: grid; gap: 8px; }
+.settings-field input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--color-surface); color: var(--color-text); }
+.explore-search { max-width: 720px; }
+.explore-sections { display: grid; gap: 18px; }
+.explore-group { display: grid; gap: 10px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--color-text); }
+
 .section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
 .section-head h2 { margin: 0; }
 
 .empty-state { padding: 18px; border: 1px dashed var(--border); border-radius: var(--radius-md); color: var(--color-text-muted); }
+
+@media (max-width: 767px) {
+  .topbar { flex-wrap: wrap; }
+  .search-field { order: 3; width: 100%; }
+  .topbar__actions { width: 100%; justify-content: flex-end; }
+  .player-bar { left: 0; right: 0; transform: none; width: 100%; padding: 12px 12px calc(var(--player-height) - 24px); flex-direction: column; align-items: stretch; }
+  .player-bar__left, .player-bar__center, .player-bar__right { width: 100%; justify-content: center; }
+  .player-bar__center { order: 2; }
+  .player-bar__right { justify-content: center; }
+  .settings-page, .explore-page { padding: 16px 12px 120px; }
+  .section-head { flex-direction: column; align-items: flex-start; }
+}
 
 @media (min-width: 768px) {
   .app-shell { grid-template-columns: var(--sidebar-width) 1fr; }

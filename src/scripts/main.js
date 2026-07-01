@@ -24,9 +24,11 @@ let currentVisibleSongs = [...songs];
 let queue = [];
 
 // Функция обновления очереди
-function updateQueue(items, forceTop = false) {
+function updateQueue(items, forceTop = false, options = {}) {
+  const previousQueue = [...queue];
+  const previousIndex = previousQueue.findIndex(item => item.id === player.currentSongId);
   queue = [...items];
-  playlistPanel.setQueue(queue);    // теперь setQueue только рендерит
+  playlistPanel.setQueue(queue);
   player.setQueue(queue);
 
   const queueHint = document.getElementById('queueHint');
@@ -40,21 +42,36 @@ function updateQueue(items, forceTop = false) {
   }
 
   const currentInQueue = queue.some(item => item.id === player.currentSongId);
+  const replacementAtActiveSlot = Boolean(options.switchOnReplacement && previousIndex >= 0 && queue[previousIndex]?.id && queue[previousIndex].id !== player.currentSongId);
+
   if (forceTop || !currentInQueue) {
     player.loadSong(queue[0].id);
+    return;
+  }
+
+  if (replacementAtActiveSlot) {
+    player.loadSong(queue[previousIndex].id);
   }
 }
 
 function addToQueue(songId) {
   const song = getSongById(songId);
   if (!song) return;
-  if (queue.some(item => item.id === song.id)) return;
-  // Добавляем в начало очереди и сразу загружаем
+
+  const existingIndex = queue.findIndex(item => item.id === song.id);
+  if (existingIndex >= 0) {
+    const reordered = [...queue];
+    const [moved] = reordered.splice(existingIndex, 1);
+    reordered.unshift(moved);
+    updateQueue(reordered, true, { switchOnReplacement: true });
+    return;
+  }
+
   updateQueue([song, ...queue], true);
 }
 
 function removeFromQueue(songId) {
-  updateQueue(queue.filter(song => song.id !== songId));
+  updateQueue(queue.filter(song => song.id !== songId), false, { switchOnReplacement: true });
 }
 
 function loadQueueSong(songId) {
@@ -64,7 +81,7 @@ function loadQueueSong(songId) {
 }
 
 function handleQueueReorder(newQueue) {
-  updateQueue(newQueue, true);
+  updateQueue(newQueue, false, { switchOnReplacement: true });
 }
 
 function renderRecommendations(items = songs) {
@@ -117,14 +134,15 @@ function renderAuthArea() {
     return;
   }
   const user = auth.user;
+  const avatarSrc = user.avatar || `https://pravatar.cc/100?u=${user.id}`;
   area.innerHTML = `
     <div style="position:relative">
       <button class="avatar-button" type="button" data-account-toggle>
-        <img src="https://pravatar.cc/100?u=${user.id}" alt="${user.name}">
+        <img src="${avatarSrc}" alt="${user.name}">
         <span>${user.name}</span>
       </button>
       <div class="account-menu hidden" data-account-menu>
-        <a class="sidebar__link" href="src/pages/register.html">Настройки</a>
+        <a class="sidebar__link" href="src/pages/settings.html">Настройки</a>
         <button class="sidebar__link" type="button" data-logout>Log Out</button>
       </div>
     </div>
@@ -164,7 +182,14 @@ function init() {
   theme.init();
   renderAuthArea();
   renderRecommendations(songs);
-  updateQueue([]);
+  const restoredQueue = player.restoreQueue();
+  if (restoredQueue) {
+    queue = [...player.playlist];
+    playlistPanel.setQueue(queue);
+    updateQueue(queue);
+  } else {
+    updateQueue([]);
+  }
 
   document.addEventListener('click', handleFavoritesClick);
   document.querySelector('[data-playlists-link]')?.addEventListener('click', handlePlaylistsLink);
