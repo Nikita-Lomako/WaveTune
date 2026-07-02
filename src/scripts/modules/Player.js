@@ -70,9 +70,10 @@ export default class Player {
     });
   }
 
-  async loadSong(songId) {
+  async loadSong(songId, options = {}) {
     const song = getSongById(songId);
     if (!song) return;
+    const shouldResume = Boolean(options.resume);
     this.currentSongId = song.id;
     this.currentIndex = this.playlist.findIndex(item => item.id === song.id);
     if (this.currentIndex < 0) {
@@ -84,13 +85,27 @@ export default class Player {
         this.playlist = [song];
       }
     }
-    this.currentTime = Number(localStorage.getItem(`wave-track-time:${song.id}`) || 0);
+
+    this.currentTime = shouldResume ? Number(localStorage.getItem(`wave-track-time:${song.id}`) || 0) : 0;
+    this.audio.pause();
     this.audio.src = song.audio;
     this.audio.load();
     this.renderSong(song);
     localStorage.setItem('wave-last-track', String(song.id));
-    this.audio.currentTime = this.currentTime;
+    this.audio.currentTime = 0;
     this.persistQueue();
+
+    const applyPosition = () => {
+      if (shouldResume && this.currentTime > 0) {
+        this.audio.currentTime = this.currentTime;
+      } else {
+        this.audio.currentTime = 0;
+      }
+    };
+
+    this.audio.addEventListener('loadedmetadata', applyPosition, { once: true });
+    applyPosition();
+
     await this.audio.play().catch(() => {
       this.isPlaying = false;
       this.renderPlaybackState();

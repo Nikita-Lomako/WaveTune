@@ -26,7 +26,8 @@ let queue = [];
 // Функция обновления очереди
 function updateQueue(items, forceTop = false, options = {}) {
   const previousQueue = [...queue];
-  const previousIndex = previousQueue.findIndex(item => item.id === player.currentSongId);
+  const currentSongIdBeforeUpdate = player.currentSongId;
+  const previousIndex = previousQueue.findIndex(item => item.id === currentSongIdBeforeUpdate);
   queue = [...items];
   playlistPanel.setQueue(queue);
   player.setQueue(queue);
@@ -41,16 +42,27 @@ function updateQueue(items, forceTop = false, options = {}) {
     return;
   }
 
-  const currentInQueue = queue.some(item => item.id === player.currentSongId);
-  const replacementAtActiveSlot = Boolean(options.switchOnReplacement && previousIndex >= 0 && queue[previousIndex]?.id && queue[previousIndex].id !== player.currentSongId);
+  const currentInQueue = queue.some(item => item.id === currentSongIdBeforeUpdate);
+  const replacementAtActiveSlot = Boolean(options.switchOnReplacement && previousIndex >= 0 && queue[previousIndex]?.id && queue[previousIndex].id !== currentSongIdBeforeUpdate);
+  const removedCurrentTrack = Boolean(options.switchOnReplacement && previousIndex >= 0 && !currentInQueue);
 
   if (forceTop || !currentInQueue) {
-    player.loadSong(queue[0].id);
+    const nextSongId = queue[0]?.id;
+    if (nextSongId) {
+      player.loadSong(nextSongId, { resume: false });
+    }
     return;
   }
 
   if (replacementAtActiveSlot) {
-    player.loadSong(queue[previousIndex].id);
+    player.loadSong(queue[previousIndex].id, { resume: false });
+  }
+
+  if (removedCurrentTrack) {
+    const nextSongId = queue[0]?.id;
+    if (nextSongId) {
+      player.loadSong(nextSongId, { resume: false });
+    }
   }
 }
 
@@ -77,7 +89,7 @@ function removeFromQueue(songId) {
 function loadQueueSong(songId) {
   const song = queue.find(item => item.id === Number(songId));
   if (!song) return;
-  player.loadSong(song.id);
+  player.loadSong(song.id, { resume: false });
 }
 
 function handleQueueReorder(newQueue) {
